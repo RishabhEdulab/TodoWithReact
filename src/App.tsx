@@ -1,24 +1,21 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from "react";
+import logo from "./logo.svg";
+import Student from "./component/Page/Student";
+import Register from "./component/Auth/Register";
+import Login from "./component/Auth/Login";
+import { BrowserRouter, Route, Switch } from "react-router-dom";
+// import './index.css';
 
 function App() {
+  const [isAuthenticated,setIsAuthenticated]=useState<boolean>(false)
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <Switch>
+        <Route exact  path="/" component={Register}></Route>
+        <Route path="/Login" component={()=><Login isAuthenticated={isAuthenticated} setIsAuthenticated={setIsAuthenticated} />}></Route>
+        <Route path="/Student" component={()=><Student isAuthenticated={isAuthenticated} />}></Route>
+      </Switch>
+      
     </div>
   );
 }
