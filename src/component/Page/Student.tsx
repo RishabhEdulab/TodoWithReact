@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import AxiosGet from "../../coustom/axiosGet";
 import { Console } from "console";
 import { Interface } from "readline";
 import { boolean } from "yup";
-import { Redirect } from "react-router-dom";
+import { Redirect, useHistory } from "react-router-dom";
+import Headers from "../Page/Headers";
 interface ClickParams {
   id: number;
   action: string;
 }
-interface props{
-  isAuthenticated:Boolean
+interface props {
+  isAuthenticated: Boolean;
 }
-const Student = ({isAuthenticated}:props) => {
+const Student = ({ isAuthenticated }: props) => {
   const [name, setName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
@@ -20,24 +21,28 @@ const Student = ({isAuthenticated}:props) => {
   const [gender, setGender] = useState<string>("");
   const [isEditMode, setIsEditMode] = useState<boolean | undefined>(false);
   const [isEditId, setIsEditId] = useState<number | undefined>(0);
-  
-const token=localStorage.getItem("token");
+const history=useHistory()
+  const token = localStorage.getItem("token");
 
-if(!isAuthenticated){
-  <Redirect to="/Login" />
-}
-if(!process.env.REACT_APP_Emp_URL){
- throw new Error("REACT_APP_Emp_URL is undefined");
-}
+  if (!process.env.REACT_APP_Emp_URL) {
+    throw new Error("REACT_APP_Emp_URL is undefined");
+  }
   const { data, error, getData } = AxiosGet(
-   `${process.env.REACT_APP_Emp_URL}Employees/Get`,token??""
+    `${process.env.REACT_APP_Emp_URL}Employees/Get`,
+    token ?? ""
   );
-  console.log("axios get data", data);
+  if (error) {
+    const axiosError = error as AxiosError;
+    if (axiosError.response?.status === 401) {
+      history.push("/Login")
+    }
+  }
+
   const HandleSubmit = async () => {
     if (!name || !email || !password || !age || !gender) {
       return alert("All Fields are required");
     }
-   
+
     const data = {
       name: name,
       email: email,
@@ -77,9 +82,10 @@ if(!process.env.REACT_APP_Emp_URL){
       setIsEditMode(true);
       setIsEditId(params.id);
       const updateResponse = await axios.get(
-        `${process.env.REACT_APP_Emp_URL}Employees/Get?id=${params.id}&action=${params.action}`,config
+        `${process.env.REACT_APP_Emp_URL}Employees/Get?id=${params.id}&action=${params.action}`,
+        config
       );
-      console.log("up",updateResponse);
+      console.log("up", updateResponse);
 
       setName(updateResponse.data.name);
       setEmail(updateResponse.data.email);
@@ -100,7 +106,7 @@ if(!process.env.REACT_APP_Emp_URL){
         age: age,
         gender: gender,
       };
-      
+
       console.log("update", data);
       const updateResponse = await axios.put(
         `${process.env.REACT_APP_Emp_URL}Employees/Update`,
@@ -125,17 +131,16 @@ if(!process.env.REACT_APP_Emp_URL){
 
   const handleDelete = async (params: ClickParams) => {
     try {
-      if(!params.id){
-      return  console.log("delete id", params.id);
-        
+      if (!params.id) {
+        return console.log("delete id", params.id);
       }
-     
+
       const deleteResponse = await axios.delete(
         `${process.env.REACT_APP_Emp_URL}Employees/Delete?id=${params.id}&action=${params.action}`
       );
-     if(deleteResponse.status===404){
-      return alert("Something went wrong")
-     }
+      if (deleteResponse.status === 404) {
+        return alert("Something went wrong");
+      }
 
       alert("Data is Deleted successfully");
       getData();
@@ -145,6 +150,7 @@ if(!process.env.REACT_APP_Emp_URL){
   };
   return (
     <>
+    <Headers/>
       <div className="flex items-center justify-center">
         <div className="block max-w-md rounded-lg bg-white p-6 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)]">
           <form className="mt-8 mb-2 w-80 max-w-screen-lg sm:w-96">
@@ -193,7 +199,7 @@ if(!process.env.REACT_APP_Emp_URL){
                   <input
                     className="peer h-full w-full rounded-[7px] border border-blue-gray-200 border-t-transparent bg-transparent px-3 py-2.5 font-sans text-sm font-normal text-blue-gray-700 outline outline-0 transition-all placeholder-shown:border placeholder-shown:border-blue-gray-200 placeholder-shown:border-t-blue-gray-200 focus:border-2 focus:border-pink-500 focus:border-t-transparent focus:outline-0 disabled:border-0 disabled:bg-blue-gray-50"
                     placeholder=" "
-                    value={age ||''}
+                    value={age || ""}
                     onChange={(e) => setAge(Number(e.target.value))}
                   />
                   <label className="before:content[' '] after:content[' '] pointer-events-none absolute left-0 -top-1.5 flex h-full w-full select-none text-[11px] font-normal leading-tight text-blue-gray-400 transition-all before:pointer-events-none before:mt-[6.5px] before:mr-1 before:box-border before:block before:h-1.5 before:w-2.5 before:rounded-tl-md before:border-t before:border-l before:border-blue-gray-200 before:transition-all after:pointer-events-none after:mt-[6.5px] after:ml-1 after:box-border after:block after:h-1.5 after:w-2.5 after:flex-grow after:rounded-tr-md after:border-t after:border-r after:border-blue-gray-200 after:transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:leading-[3.75] peer-placeholder-shown:text-blue-gray-500 peer-placeholder-shown:before:border-transparent peer-placeholder-shown:after:border-transparent peer-focus:text-[11px] peer-focus:leading-tight peer-focus:text-pink-500 peer-focus:before:border-t-2 peer-focus:before:border-l-2 peer-focus:before:border-pink-500 peer-focus:after:border-t-2 peer-focus:after:border-r-2 peer-focus:after:border-pink-500 peer-disabled:text-transparent peer-disabled:before:border-transparent peer-disabled:after:border-transparent peer-disabled:peer-placeholder-shown:text-blue-gray-500">
