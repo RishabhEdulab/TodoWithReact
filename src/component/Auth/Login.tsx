@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { RegistrationType } from "../../types/RegisterTypes";
@@ -18,6 +18,9 @@ interface loginPageProps{
 }
 const Login = ({isAuthenticated,setIsAuthenticated}:loginPageProps) => {
   const history = useHistory();
+  useEffect(()=>{
+    localStorage.removeItem('token');
+  },)
   const formIk = useFormik<LoginTypes>({
     initialValues: {
       email: "",
